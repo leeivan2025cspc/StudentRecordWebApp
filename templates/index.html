@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Record System</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>📚 Student Record System</h2>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <h3>Add / Delete Student</h3>
+      <div class="form-grid">
+        <input id="id" placeholder="Student ID">
+        <input id="name" placeholder="Full Name">
+        <input id="course" placeholder="Course">
+        <input id="grade" placeholder="Grade">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn primary" id="addBtn">Add Student</button>
+        <button class="btn danger" id="deleteBtn">Delete Student</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Search & Sorting</h3>
+      <div class="form-grid">
+        <input id="searchQ" placeholder="Search by name or ID">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" id="searchBtn">Search</button>
+        <button class="btn" id="viewAllBtn">View All</button>
+        <button class="btn" id="sortNameBtn">Sort by Name</button>
+        <button class="btn" id="sortIdBtn">Sort by ID</button>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <h3>Student Records</h3>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Grade</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <script src="/static/app.js"></script>
+
+</body>
+</html>
