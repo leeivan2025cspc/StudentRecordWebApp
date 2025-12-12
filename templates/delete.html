@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Delete Student</h2>
+  <div class="subcard">
+    <h3>Delete by ID</h3>
+    <input id="del_id" placeholder="Enter Student ID">
+    <button class="btn danger" id="delIdBtn">Delete by ID</button>
+  </div>
+  <div class="subcard">
+    <h3>Delete by Name</h3>
+    <input id="del_name" placeholder="Enter Student Name">
+    <button class="btn danger" id="delNameBtn">Delete by Name</button>
+  </div>
+  <div id="msg" class="msg"></div>
+</div>
+<script src="{{ url_for('static', filename='delete.js') }}"></script>
+{% endblock %}

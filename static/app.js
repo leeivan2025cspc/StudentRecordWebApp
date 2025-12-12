@@ -93,3 +93,78 @@ document.getElementById('sortIdBtn').addEventListener('click', async () => {
 
 // initial load
 refresh();
+
+function loadAllStudents() {
+    fetch("/view")
+        .then(res => res.json())
+        .then(data => {
+            const table = document.querySelector("#tbl tbody");
+            table.innerHTML = "";
+
+            data.forEach(stu => {
+                let row = `
+                    <tr>
+                        <td>${stu.id}</td>
+                        <td>${stu.name}</td>
+                        <td>${stu.course}</td>
+                        <td>${stu.grade}</td>
+                    </tr>
+                `;
+                table.innerHTML += row;
+            });
+        });
+}
+
+// ADD STUDENT
+document.getElementById("addBtn").onclick = function () {
+    const student = {
+        id: document.getElementById("id").value,
+        name: document.getElementById("name").value,
+        course: document.getElementById("course").value,
+        grade: document.getElementById("grade").value
+    };
+
+    fetch("/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(student)
+    })
+        .then(res => res.json())
+        .then(msg => {
+            document.getElementById("msg").innerText = msg.message;
+            loadAllStudents(); // <-- AUTO REFRESH
+        });
+};
+
+// DELETE BY ID
+document.getElementById("delIdBtn").onclick = function () {
+    let id = document.getElementById("del_id").value;
+
+    fetch("/delete/id", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+    })
+        .then(res => res.json())
+        .then(msg => {
+            document.getElementById("msg").innerText = msg.message;
+            loadAllStudents();
+        });
+};
+
+// DELETE BY NAME
+document.getElementById("delNameBtn").onclick = function () {
+    let name = document.getElementById("del_name").value;
+
+    fetch("/delete/name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+    })
+        .then(res => res.json())
+        .then(msg => {
+            document.getElementById("msg").innerText = msg.message;
+            loadAllStudents();
+        });
+};
+

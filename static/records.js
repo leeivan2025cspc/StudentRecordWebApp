@@ -1,0 +1,8 @@
+async function api(path, opts){ const r = await fetch(path, opts); return r.json(); }
+const tbody = document.querySelector('#tbl tbody');
+const msgEl = document.getElementById('msg');
+async function refresh(){ const data = await api('/api/students'); tbody.innerHTML=''; data.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.id}</td><td>${r.name}</td><td>${r.course}</td><td>${r.grade}</td>`; tbody.appendChild(tr); }); }
+document.getElementById('viewAllBtn').addEventListener('click', refresh);
+document.getElementById('searchBtn').addEventListener('click', async ()=>{ const q=document.getElementById('searchQ').value.trim(); if(!q){ msgEl.textContent='Enter query'; msgEl.style.color='red'; return;} const res=await api('/api/search?q='+encodeURIComponent(q)); tbody.innerHTML=''; res.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.id}</td><td>${r.name}</td><td>${r.course}</td><td>${r.grade}</td>`; tbody.appendChild(tr); }); msgEl.textContent='Found '+res.length; msgEl.style.color='green'; });
+// initial load
+refresh();

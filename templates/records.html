@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Student Records</h2>
+  <div class="controls">
+    <button class="btn" id="viewAllBtn">Refresh</button>
+    <input id="searchQ" placeholder="Search by ID or name">
+    <button class="btn" id="searchBtn">Search</button>
+  </div>
+  <table id="tbl">
+    <thead><tr><th>ID</th><th>Name</th><th>Course</th><th>Grade</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div id="msg" class="msg"></div>
+</div>
+<script src="{{ url_for('static', filename='records.js') }}"></script>
+{% endblock %}

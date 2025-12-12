@@ -1,57 +1,134 @@
-# app.py
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from models import init_db, load_all_from_db, save_student_to_db, delete_student_from_db, StudentLinkedList
+import os
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET', 'dev-secret-key')
 
-# Initialize DB and load records into linked list (app-level memory)
+# Initialize DB and load into linked list
 init_db()
 ds = StudentLinkedList()
 ds.load_from_list(load_all_from_db())
 
-# Helper: sync linked list -> DB (simple approach: iterate and save)
-def sync_to_db():
-    for rec in ds.to_list():
-        save_student_to_db(rec)
+# Admin credentials (override with env vars if needed)
+ADMIN_USER = os.environ.get('ADMIN_USER', 'admin')
+ADMIN_PASS = os.environ.get('ADMIN_PASS', 'password123')
 
-@app.route("/")
+def login_required(f):
+    from functools import wraps
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return wrapped
+
+@app.route('/')
 def index():
-    return render_template("index.html")
+    if session.get('logged_in'):
+        return redirect(url_for('records'))
+    return redirect(url_for('login'))
 
-# API: get all records (traverse)
-@app.route("/api/students", methods=["GET"])
-def get_students():
-    # returns current state of linked list
+@app.route('/login', methods=['GET','POST'])
+def login():
+    msg = ''
+    if request.method == 'POST':
+        username = request.form.get('username','')
+        password = request.form.get('password','')
+        if username == ADMIN_USER and password == ADMIN_PASS:
+            session['logged_in'] = True
+            return redirect(url_for('records'))
+        else:
+            msg = 'Invalid credentials'
+    return render_template('login.html', msg=msg)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/records')
+@login_required
+def records():
+    return render_template('records.html')
+
+@app.route('/add', methods=['GET','POST'])
+@login_required
+def add_page():
+    return render_template('add.html')
+
+@app.route('/delete', methods=['GET','POST'])
+@login_required
+def delete_page():
+    return render_template('delete.html')
+
+@app.route('/search', methods=['GET','POST'])
+@login_required
+def search_page():
+    return render_template('search.html')
+
+@app.route('/sort', methods=['GET','POST'])
+@login_required
+def sort_page():
+    return render_template('sort.html')
+
+# API endpoints (JSON)
+@app.route('/api/students', methods=['GET'])
+@login_required
+def api_get_students():
     return jsonify(ds.to_list())
 
-# API: add student (insert in linked list + save to DB)
-@app.route("/api/students", methods=["POST"])
-def create_student():
-    data = request.json
-    # expected keys: id, name, course, grade
-    sid = data.get("id")
-    name = data.get("name")
+@app.route('/api/students', methods=['POST'])
+@login_required
+def api_add_student():
+    data = request.get_json() or request.form
+    sid = data.get('id','').strip()
+    name = data.get('name','').strip()
+    course = data.get('course','').strip()
+    grade = data.get('grade','').strip()
     if not sid or not name:
-        return jsonify({"error": "id and name required"}), 400
-    # insert in linked list
-    ds.insert(sid, name, data.get("course",""), data.get("grade",""))
-    # persist
-    save_student_to_db({"id": sid, "name": name, "course": data.get("course",""), "grade": data.get("grade","")})
-    return jsonify({"ok": True}), 201
+        return jsonify({'error':'id and name required'}), 400
+    if ds.find_by_id(sid):
+        return jsonify({'error':'duplicate id'}), 400
+    ds.insert(sid, name, course, grade)
+    save_student_to_db({'id':sid,'name':name,'course':course,'grade':grade})
+    return jsonify({'ok':True})
 
-# API: delete by id (use linked list deletion + db delete)
-@app.route("/api/students/<student_id>", methods=["DELETE"])
-def delete_student(student_id):
-    deleted = ds.delete_by_id(student_id)
-    if deleted:
-        delete_student_from_db(student_id)
-        return jsonify({"ok": True})
-    return jsonify({"error": "not found"}), 404
+@app.route('/api/delete/id', methods=['POST'])
+@login_required
+def api_delete_by_id():
+    data = request.get_json() or request.form
+    sid = data.get('id','').strip()
+    if not sid:
+        return jsonify({'error':'id required'}), 400
+    deleted = ds.delete_by_id(sid)
+    delete_student_from_db(sid)
+    return jsonify({'deleted': deleted})
 
-# API: search by id or name (we do logic in Python)
-@app.route("/api/search", methods=["GET"])
-def search_student():
-    q = request.args.get("q","").strip().lower()
+@app.route('/api/delete/name', methods=['POST'])
+@login_required
+def api_delete_by_name():
+    data = request.get_json() or request.form
+    name = data.get('name','').strip().lower()
+    if not name:
+        return jsonify({'error':'name required'}), 400
+    removed = 0
+    curr = ds.head
+    to_delete = []
+    while curr:
+        if curr.name.lower() == name:
+            to_delete.append(curr.id)
+        curr = curr.next
+    for sid in to_delete:
+        if ds.delete_by_id(sid):
+            delete_student_from_db(sid)
+            removed += 1
+    return jsonify({'removed': removed})
+
+@app.route('/api/search', methods=['GET'])
+@login_required
+def api_search():
+    q = request.args.get('q','').strip().lower()
     if not q:
         return jsonify([])
     results = []
@@ -60,18 +137,18 @@ def search_student():
             results.append(r)
     return jsonify(results)
 
-# API: sort
-@app.route("/api/sort", methods=["POST"])
-def sort_students():
-    data = request.json
-    key = data.get("by","name")
-    if key == "name":
+@app.route('/api/sort', methods=['POST'])
+@login_required
+def api_sort():
+    data = request.get_json() or request.form
+    key = data.get('by','name')
+    if key == 'name':
         ds.sort_by_name()
     else:
         ds.sort_by_id()
-    # after sorting, persist order to DB (we will replace rows by storing them; since DB has no order, this simply ensures DB has same content)
-    sync_to_db()
-    return jsonify({"ok": True})
+    for rec in ds.to_list():
+        save_student_to_db(rec)
+    return jsonify({'ok':True})
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)

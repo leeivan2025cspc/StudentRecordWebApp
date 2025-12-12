@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Add Student</h2>
+  <div class="form-grid">
+    <input id="id" placeholder="Student ID">
+    <input id="name" placeholder="Full Name">
+    <input id="course" placeholder="Course">
+    <input id="grade" placeholder="Grade">
+  </div>
+  <div class="btn-group">
+    <button class="btn primary" id="addBtn">Add Student</button>
+    <button class="btn" id="clearBtn">Clear</button>
+  </div>
+  <div id="msg" class="msg"></div>
+</div>
+<script src="{{ url_for('static', filename='add.js') }}"></script>
+{% endblock %}

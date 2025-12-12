@@ -14,21 +14,42 @@
 
   <div class="container">
 
+    <!-- ADD STUDENT SECTION -->
     <div class="card">
-      <h3>Add / Delete Student</h3>
+      <h3>Add Student</h3>
       <div class="form-grid">
         <input id="id" placeholder="Student ID">
         <input id="name" placeholder="Full Name">
         <input id="course" placeholder="Course">
         <input id="grade" placeholder="Grade">
       </div>
-
-      <div class="btn-group">
-        <button class="btn primary" id="addBtn">Add Student</button>
-        <button class="btn danger" id="deleteBtn">Delete Student</button>
-      </div>
+      <button class="btn primary" id="addBtn">Add Student</button>
     </div>
 
+
+
+    <!-- DELETE STUDENT SECTION -->
+    <div class="card">
+      <h3>Delete Student</h3>
+
+      <p style="font-weight:600; margin-bottom:6px;">Delete by ID</p>
+      <div class="form-grid">
+        <input id="del_id" placeholder="Enter Student ID">
+      </div>
+      <button class="btn danger" id="delIdBtn">Delete by ID</button>
+
+      <hr style="margin:20px 0;">
+
+      <p style="font-weight:600; margin-bottom:6px;">Delete by Name</p>
+      <div class="form-grid">
+        <input id="del_name" placeholder="Enter Student Name">
+      </div>
+      <button class="btn danger" id="delNameBtn">Delete by Name</button>
+    </div>
+
+
+
+    <!-- SEARCH & SORT SECTION -->
     <div class="card">
       <h3>Search & Sorting</h3>
       <div class="form-grid">
@@ -43,6 +64,9 @@
       </div>
     </div>
 
+
+
+    <!-- STUDENT TABLE SECTION -->
     <div class="card table-card">
       <h3>Student Records</h3>
       <table id="tbl">
@@ -59,6 +83,7 @@
     </div>
 
     <div id="msg" class="msg"></div>
+
   </div>
 
   <script src="/static/app.js"></script>

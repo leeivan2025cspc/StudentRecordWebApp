@@ -1,8 +1,6 @@
-# models.py
 import sqlite3
 from typing import Optional, List, Dict
-
-DB_PATH = "students.db"
+DB_PATH = 'students.db'
 
 class StudentNode:
     def __init__(self, student_id: str, name: str, course: str, grade: str):
@@ -13,14 +11,13 @@ class StudentNode:
         self.next = None
 
     def to_dict(self):
-        return {"id": self.id, "name": self.name, "course": self.course, "grade": self.grade}
+        return {'id': self.id, 'name': self.name, 'course': self.course, 'grade': self.grade}
 
 class StudentLinkedList:
     def __init__(self):
         self.head: Optional[StudentNode] = None
 
     def insert(self, student_id: str, name: str, course: str, grade: str):
-        # insert at head (fast)
         new_node = StudentNode(student_id, name, course, grade)
         new_node.next = self.head
         self.head = new_node
@@ -55,13 +52,11 @@ class StudentLinkedList:
         return arr
 
     def load_from_list(self, arr: List[Dict]):
-        # Builds linked list from array (arr assumed newest->oldest if you want)
         self.head = None
         for record in reversed(arr):
-            self.insert(record['id'], record['name'], record['course'], record['grade'])
+            self.insert(record['id'], record['name'], record.get('course',''), record.get('grade',''))
 
     def sort_by_name(self):
-        # Convert to array, sort in Python, rebuild linked list
         arr = self.to_list()
         arr.sort(key=lambda r: r['name'].lower())
         self.load_from_list(arr)
@@ -71,7 +66,7 @@ class StudentLinkedList:
         arr.sort(key=lambda r: r['id'])
         self.load_from_list(arr)
 
-# DB helpers (SQLite)
+# SQLite helpers
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -91,7 +86,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-def load_all_from_db() -> List[Dict]:
+def load_all_from_db():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT id, name, course, grade FROM students')
@@ -102,8 +97,7 @@ def load_all_from_db() -> List[Dict]:
 def save_student_to_db(record: Dict):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('REPLACE INTO students (id, name, course, grade) VALUES (?, ?, ?, ?)',
-                (record['id'], record['name'], record.get('course',''), record.get('grade','')))
+    cur.execute('REPLACE INTO students (id, name, course, grade) VALUES (?, ?, ?, ?)', (record['id'], record['name'], record.get('course',''), record.get('grade','')))
     conn.commit()
     conn.close()
 

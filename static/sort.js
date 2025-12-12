@@ -1,0 +1,5 @@
+async function api(path, opts){ const r = await fetch(path, opts); return r.json(); }
+const tbody = document.querySelector('#tbl tbody');
+const msgEl = document.getElementById('msg');
+document.getElementById('sortNameBtn').addEventListener('click', async ()=>{ await api('/api/sort',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({by:'name'})}); const data=await api('/api/students'); tbody.innerHTML=''; data.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.id}</td><td>${r.name}</td><td>${r.course}</td><td>${r.grade}</td>`; tbody.appendChild(tr); }); msgEl.textContent='Sorted by name'; msgEl.style.color='green'; });
+document.getElementById('sortIdBtn').addEventListener('click', async ()=>{ await api('/api/sort',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({by:'id'})}); const data=await api('/api/students'); tbody.innerHTML=''; data.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.id}</td><td>${r.name}</td><td>${r.course}</td><td>${r.grade}</td>`; tbody.appendChild(tr); }); msgEl.textContent='Sorted by ID'; msgEl.style.color='green'; });

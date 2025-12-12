@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Record System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">📚 Student Record System</div>
+
+    {% if session.logged_in %}
+    <nav class="sidebar-menu">
+        <a href="{{ url_for('records') }}">📄 Records</a>
+        <a href="{{ url_for('add_page') }}">➕ Add</a>
+        <a href="{{ url_for('delete_page') }}">🗑 Delete</a>
+        <a href="{{ url_for('search_page') }}">🔍 Search</a>
+        <a href="{{ url_for('sort_page') }}">🔃 Sort</a>
+        <a class="logout" href="{{ url_for('logout') }}">🚪 Logout</a>
+    </nav>
+    {% endif %}
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <main class="content-area">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>
